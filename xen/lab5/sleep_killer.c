@@ -31,6 +31,7 @@ int thread(void *data)
 	struct task_struct *task, *tmp_task;
 	int last_pid = 0;
 	struct siginfo sigkill;
+	int errkill;
 
 	sigkill.si_signo = SIGKILL;
 	sigkill.si_errno = 0;
@@ -62,12 +63,16 @@ int thread(void *data)
 				task = tmp_task;
 				rcu_read_lock();
 				vpid = find_vpid(task->pid);
-				kill_pid(vpid, SIGKILL, 1);
+				errkill = kill_pid(vpid, SIGKILL, 1);
 				rcu_read_unlock();
 				//send_sig_info(SIGKILL, &sigkill, task); // do this, or the above 4 lines
-				printk(KERN_INFO "found process %s\n", task->comm);
+				//printk(KERN_INFO "found process %s\n", task->comm);
 				//set_task_state(task, TASK_STOPPED);
-				printk(KERN_INFO "sleep_killer LKM killed %s [%d]\n", task->comm, task->pid);
+				if (errkill == 0) {
+					printk(KERN_INFO "sleep_killer LKM killed(%d) %s [%d]\n", errkill, task->comm, task->pid);
+				} else {
+					printk(KERN_INFO "sleep_killer LKM could not kill %s [%d]\n", task->comm, task->pid);
+				}
 			}
 		}
 
