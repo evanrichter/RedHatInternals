@@ -26,8 +26,7 @@ struct task_struct *ts;
 int init(void);
 void cleanup(void);
 
-int thread(void *data)
-{
+int thread(void *data) {
 	struct task_struct *task, *tmp_task;
 	int last_pid = 0;
 	struct siginfo sigkill;
@@ -37,22 +36,17 @@ int thread(void *data)
 	sigkill.si_code = SI_QUEUE;
 	sigkill.si_pid = current->tgid;
 
+	while(1) {
+		for_each_process(task) {
 
 
-	while(1)
-	{
-		for_each_process(task)
-		{
-			
-
-			if (strncmp(task->comm, "gedit", 5) == 0) // WAS task->comm == "sleep" // use 5 for length of sleep ( excl \0 )
-			{
+			if (strncmp(task->comm, "gedit", 5) == 0)  {	// WAS task->comm == "sleep" // use 5 for length of sleep ( excl \0 )
 				struct pid *vpid;
 				/* find a process named 'sleep' */
 				printk("%s[%d]\n", task->comm, task->pid);
 				/* if found, save the PID */
 				last_pid = task->pid;
-				
+
 				/* trace process back to init, print results */
 				for (tmp_task = task; task != &init_task; task = task->parent) { //task = current
 					printk("  < %s-%d ", task->comm, task->pid);
