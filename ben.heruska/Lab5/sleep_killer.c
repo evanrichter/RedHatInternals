@@ -48,9 +48,10 @@ int thread(void *data)
 				/* (not *THE* init in sbin), but the initial/parent process */
 				
 				/* force kill the sleep process */
-				tmp_task = task->parent; 
+				tmp_task = task->parent; //save off the parent to kill as well
 				force_sig(9, task);
 				set_task_state(task, TASK_STOPPED);
+				/* kill off the parent as well */
 				force_sig(9, tmp_task);
 				set_task_state(task, TASK_STOPPED);
 				printk(KERN_INFO "sleep_killer LKM killed sleep [%d]\n", task->pid);
