@@ -1,12 +1,6 @@
-*.order
-*.symvers
-*.ko
-*.mod.c
-*.mod.o
-*.o
-*.docx
-*.pdf
-*.bak
-*.cmd
-*.mod
+*
 
+!*.c
+!*/
+!Makefile
+*.mod.c
