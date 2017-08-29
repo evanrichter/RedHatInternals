@@ -42,9 +42,7 @@ int thread(void *data)
 		printk("incrementer: thread %d started\n", x);
 		up(&sem);
 		msleep(lessthan1000);
-		down_interruptible(&sem);
 		printk("incrementer:thread %d finished\n", x);
-		up(&sem);
 		break;
 	}
 
