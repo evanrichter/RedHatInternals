@@ -34,6 +34,7 @@ static int foo_id = 1;
 void foo_constructor(void *buf) {
 	struct foo *sfoo = buf;
 	sfoo->id = foo_id;
+	printk("slabex: obj->id=%d, foo_id=%d\n", sfoo->id, foo_id);
 	foo_id++;
 	return;
 }
@@ -68,10 +69,6 @@ void slab_ex(void)
 	if(myobject)		//Did we succeed?
 	{
 		printk("slabex: Object created(id=%d), freeing ...\n", myobject->id);
-
-		/* Free myobject using kmem_cache_free */
-		kmem_cache_free(my_cachep, myobject);
-		printk("slabex: Object freed\n");
 	}
 	else		//We failed to allocate
 	{
@@ -83,14 +80,22 @@ void slab_ex(void)
 		if(myotherobj)		//Did we succeed?
 		{
 			printk("slabex: Object created(id=%d), freeing ...\n", myotherobj->id);
-
-			/* Free myobject using kmem_cache_free */
-			kmem_cache_free(my_cachep, myotherobj);
-			printk("slabex: Object freed\n");
 		}
 		else		//We failed to allocate
 		{
 			printk("slabex: kmem_cache_alloc failed!\n");
+		}
+
+		if (myobject) {
+			/* Free myobject using kmem_cache_free */
+			kmem_cache_free(my_cachep, myobject);
+			printk("slabex: Object freed\n");
+		}
+
+		if (myotherobj) {
+			/* Free myobject using kmem_cache_free */
+			kmem_cache_free(my_cachep, myotherobj);
+			printk("slabex: Object freed\n");
 		}
 }
 
