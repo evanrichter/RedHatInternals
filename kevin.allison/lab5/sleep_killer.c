@@ -17,6 +17,8 @@ MODULE_LICENSE("GPL");           // Get rid of taint message by declaring code a
 MODULE_AUTHOR(DRIVER_AUTHOR);    // Who wrote this module?
 MODULE_DESCRIPTION(DRIVER_DESC); // What does this module do?
 
+#define SIGKILL     9
+
 /* Global task structure */
 struct task_struct *ts;
 
@@ -25,28 +27,42 @@ void cleanup(void);
 
 int thread(void *data)
 {
-	struct task_struct *task, *tmp_task;
+	struct task_struct *task;
 
 	while(1) {
 		for_each_process(task) {
 			/* find a process named 'gedit' */
 			if (strcmp("gedit", task->comm) == 0) {
+                struct task_struct *tmp_task;
+                struct pid *vpid;
+                int err;
+
 				printk("%s[%d]\n", task->comm, task->pid);
 
 				/* trace process back to init, print results */
-				for (tmp_task = current; tmp_task != &init_task; tmp_task = tmp_task->parent) {
+				for (tmp_task = task; tmp_task != &init_task; tmp_task = tmp_task->parent) {
 					printk(KERN_INFO "--> %s\n", tmp_task->comm);
 				}
+                printk(KERN_INFO "--> %s\n", tmp_task->comm);
 
 				/* force kill the gedit process */
-				force_sig(9, task);
-				set_task_state(task, TASK_STOPPED);
-				printk(KERN_INFO "gedit_killer LKM killed gedit [%d]\n", task->pid);
+                rcu_read_lock();
+                vpid = find_vpid(task->pid);
+                rcu_read_unlock();
+
+                if (vpid) 
+                    err = kill_pid(vpid, SIGKILL, 1);
+
+				if (!err) {
+                    printk(KERN_INFO "gedit_killer killed gedit [%d]\n", task->pid);
+                } else {
+                    printk(KERN_INFO "gedit_killer failed to kill gedit [%d]\n", task->pid);
+                }
 			}
 		}
 
 		/* make sure we sleep here to yield the CPU, or we hang the system */
-		msleep(1000);
+		msleep(100);
 
 		/* time to exit? */
 		if (kthread_should_stop())
@@ -59,7 +75,7 @@ int thread(void *data)
 
 int init(void)
 {
-	printk(KERN_INFO "init_module() called\n");
+	printk(KERN_INFO "Loding sleep_killer...\n");
 	ts = kthread_run(thread, NULL, "kthread");
 
 	return 0;
