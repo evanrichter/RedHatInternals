@@ -25,30 +25,14 @@ static struct kmem_cache *my_cachep;
 int init(void);
 void cleanup(void);
 
-struct foo {
-	int id;
-};
-
-static int foo_id = 1;
-
-void foo_constructor(void *buf) {
-	struct foo *sfoo = buf;
-	sfoo->id = foo_id;
-	printk("slabex: obj->id=%d, foo_id=%d\n", sfoo->id, foo_id);
-	foo_id++;
-	return;
+static void mystruct_constructor(void *addr) {
+    memset(addr, 0, 32);
 }
 
 static void init_my_cache(void)
 {
 	/* initialize my_cachep using kmem_cache_create */
-	/*
-	 * struct kmem_cache * kmem_cache_create(const char *name, size_t objectSizeBytes, size_t offsetIntoPage,
-			unsigned long flags,
-			void (*)(void *) constructor)
-	 * Not sure about that last param
-	 */
-	my_cachep = kmem_cache_create("slabex", sizeof(struct foo), 0, SLAB_HWCACHE_ALIGN, foo_constructor);
+	my_cachep = kmem_cache_create("slabex", 32, SLAB_HWCACHE_ALIGN, NULL, mystruct_constructor);
 	//Warning issued due to creating no Constructor/Destructor [passing NULL]
 	//They are not required for the lab, and the warning can be safely ignored
 	return;
@@ -56,7 +40,7 @@ static void init_my_cache(void)
 
 void slab_ex(void)
 {
-	struct foo *myobject, *myotherobj;
+	void *myobject;
 
 	/* validate kmem_cache structure */
 	//printk("slabex: Cache name is %s\n", kmem_cache_name(my_cachep));
@@ -68,35 +52,16 @@ void slab_ex(void)
 	myobject = kmem_cache_alloc(my_cachep, GFP_KERNEL);
 	if(myobject)		//Did we succeed?
 	{
-		printk("slabex: Object created(id=%d), freeing ...\n", myobject->id);
+		printk("slabex: Object created, freeing ...\n");
+
+		/* Free myobject using kmem_cache_free */
+		kmem_cache_free(my_cachep, myobject);
+		printk("slabex: Object freed\n");
 	}
 	else		//We failed to allocate
 	{
 		printk("slabex: kmem_cache_alloc failed!\n");
 	}
-	////////////////////////////////////////////
-	printk("slabex: Allocating object in my_cachep with GFP_KERNEL flag\n");
-		myotherobj = kmem_cache_alloc(my_cachep, GFP_KERNEL);
-		if(myotherobj)		//Did we succeed?
-		{
-			printk("slabex: Object created(id=%d), freeing ...\n", myotherobj->id);
-		}
-		else		//We failed to allocate
-		{
-			printk("slabex: kmem_cache_alloc failed!\n");
-		}
-
-		if (myobject) {
-			/* Free myobject using kmem_cache_free */
-			kmem_cache_free(my_cachep, myobject);
-			printk("slabex: Object freed\n");
-		}
-
-		if (myotherobj) {
-			/* Free myobject using kmem_cache_free */
-			kmem_cache_free(my_cachep, myotherobj);
-			printk("slabex: Object freed\n");
-		}
 }
 
 static void remove_my_cache(void)
