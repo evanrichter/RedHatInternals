@@ -1,1 +1,9 @@
-*.swp
+*
+
+!*.c
+!*.pdf
+!*.pptx
+!*.ppt
+!*/
+!Makefile
+*.mod.c
