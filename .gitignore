@@ -1,6 +1,7 @@
-*
+#*
 
-!*.c
-!*/
-!Makefile
-*.mod.c
+#!*.pptx
+#!*.c
+#!*/
+#!Makefile
+#*.mod.c

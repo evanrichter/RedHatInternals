@@ -46,16 +46,12 @@ void slab_ex(void)
 
 	printk("slabex: Allocating object in my_cachep with GFP_KERNEL flag\n");
 	myobject = kmem_cache_alloc(my_cachep, GFP_KERNEL);
-	if(myobject)		//Did we succeed?
-	{
+	if(myobject) {
 		printk("slabex: Object created, freeing ...\n");
-
 		/* Free myobject using kmem_cache_free */
 		kmem_cache_free(my_cachep, myobject);
 		printk("slabex: Object freed\n");
-	}
-	else		//We failed to allocate
-	{
+    } else {
 		printk("slabex: kmem_cache_alloc failed!\n");
 	}
 }
@@ -66,12 +62,10 @@ static void remove_my_cache(void)
 
 	/* destroy kmem_cache using kmem_cache_destroy */
 	/* check to see if the cache is valid first ... */
-	if(my_cachep)		//Do we even have a cache?
-	{
-		kmem_cache_destroy(my_cachep);		//Let's destroy it
-	}
-	else				//We don't have a cache
-	{
+	if(my_cachep) {
+        /* we have a cache, let's destroy it */
+		kmem_cache_destroy(my_cachep);		
+    } else {
 		printk("slabex:  no cache found\n");
 	}
 	return;
