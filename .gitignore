@@ -1,7 +1,1 @@
-#*
-
-#!*.pptx
-#!*.c
-#!*/
-#!Makefile
-#*.mod.c
+*.swp
